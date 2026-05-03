@@ -3,10 +3,11 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
+#include <limits>
 
 using namespace std;
 
-// ================= STRUCTURI =================
+// Structures
 
 struct Book {
     int id;
@@ -26,7 +27,7 @@ struct Transaction {
     bool returned;
 };
 
-// ================= CLASA =================
+// Class
 
 class Library {
 private:
@@ -34,22 +35,28 @@ private:
     vector<Member> members;
     vector<Transaction> transactions;
 
-    // ===== VALIDARE ID =====
-    bool bookExists(int id) {
-        for (auto& b : books)
-            if (b.id == id) return true;
-        return false;
+    // Validation
+
+    bool bookExists(int id) const {
+        return any_of(books.begin(), books.end(),
+            [id](const Book& b) { return b.id == id; });
     }
 
-    bool memberExists(int id) {
-        for (auto& m : members)
-            if (m.id == id) return true;
-        return false;
+    bool memberExists(int id) const {
+        return any_of(members.begin(), members.end(),
+            [id](const Member& m) { return m.id == id; });
+    }
+
+    Book* getBook(int id) {
+        for (auto& b : books)
+            if (b.id == id) return &b;
+        return nullptr;
     }
 
 public:
 
-    // ===== FILE IO =====
+    // Input
+
     void saveData() {
         ofstream fb("books.csv"), fm("members.csv"), ft("transactions.csv");
 
@@ -102,15 +109,16 @@ public:
         cout << "Date incarcate!\n";
     }
 
-    // ===== BOOKS =====
+    // Books
+
     void addBook() {
         Book b;
 
         cout << "ID: "; cin >> b.id;
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         if (bookExists(b.id)) {
-            cout << "❌ ID deja existent!\n";
+            cout << "(X) ID deja existent!\n";
             return;
         }
 
@@ -120,7 +128,7 @@ public:
         b.available = true;
         books.push_back(b);
 
-        cout << "✅ Carte adaugata!\n";
+        cout << "Carte adaugata!\n";
     }
 
     void searchBook() {
@@ -136,11 +144,14 @@ public:
         }
     }
 
-    void listBooks() {
+    void listBooks() const {
         cout << "\n--- CARTI ---\n";
-        for (auto& b : books) {
-            cout << b.id << " | " << b.title << " | " << b.author
-                 << " | " << (b.available ? "Disponibila" : "Imprumutata") << endl;
+        for (const auto& b : books) {
+            cout << "ID: " << b.id
+                 << " | " << b.title
+                 << " | " << b.author
+                 << " | " << (b.available ? "Disponibila" : "Imprumutata")
+                 << endl;
         }
     }
 
@@ -151,35 +162,37 @@ public:
         books.erase(remove_if(books.begin(), books.end(),
             [id](Book b) { return b.id == id; }), books.end());
 
-        cout << "🗑️ Carte stearsa!\n";
+        cout << "Carte stearsa!\n";
     }
 
-    // ===== MEMBERS =====
+    // Members
+
     void addMember() {
         Member m;
 
         cout << "ID: "; cin >> m.id;
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         if (memberExists(m.id)) {
-            cout << "❌ ID existent!\n";
+            cout << "(X) ID existent!\n";
             return;
         }
 
         cout << "Nume: "; getline(cin, m.name);
         members.push_back(m);
 
-        cout << "✅ Membru adaugat!\n";
+        cout << " Membru adaugat!\n";
     }
 
     void listMembers() {
-        cout << "\n--- MEMBRI ---\n";
+        cout << "\n MEMBRI\n";
         for (auto& m : members) {
             cout << m.id << " | " << m.name << endl;
         }
     }
 
-    // ===== TRANSACTII =====
+    // Transactions
+
     void borrowBook() {
         int bid, mid;
 
@@ -187,7 +200,7 @@ public:
         cout << "ID membru: "; cin >> mid;
 
         if (!memberExists(mid)) {
-            cout << "❌ Membru invalid!\n";
+            cout << "(X) Membru invalid!\n";
             return;
         }
 
@@ -195,12 +208,12 @@ public:
             if (b.id == bid && b.available) {
                 b.available = false;
                 transactions.push_back({mid, bid, false});
-                cout << "📖 Imprumut realizat!\n";
+                cout << " Imprumut realizat!\n";
                 return;
             }
         }
 
-        cout << "❌ Carte indisponibila!\n";
+        cout << "(X) Carte indisponibila!\n";
     }
 
     void returnBook() {
@@ -214,22 +227,23 @@ public:
                 for (auto& b : books)
                     if (b.id == bid) b.available = true;
 
-                cout << "↩️ Returnare realizata!\n";
+                cout << "↩ Returnare realizata!\n";
                 return;
             }
         }
 
-        cout << "❌ Tranzactie inexistenta!\n";
+        cout << "(X) Tranzactie inexistenta!\n";
     }
 
-    // ===== RAPORT =====
-    void report() {
-        cout << "\n📊 RAPORT COMPLET\n";
+    // Reports
+
+    void report() const {
+        cout << "\n RAPORT COMPLET\n";
 
         listBooks();
 
-        cout << "\n--- TRANZACTII ---\n";
-        for (auto& t : transactions) {
+        cout << "\nTRANZACTII\n";
+        for (const auto& t : transactions) {
             cout << "Membru " << t.memberId
                  << " -> Carte " << t.bookId
                  << " | " << (t.returned ? "Returnata" : "Imprumutata")
@@ -237,7 +251,8 @@ public:
         }
     }
 
-    // ===== MENIU =====
+    // Menu
+
     void menu() {
         int opt;
 
@@ -274,13 +289,16 @@ public:
             }
 
         } while (opt != 0);
+
+        saveData(); // auto-save
     }
 };
 
-// ================= MAIN =================
+// Main
 
 int main() {
     Library lib;
+    lib.loadData(); // auto-load
     lib.menu();
     return 0;
 }

@@ -143,14 +143,18 @@ public:
             if (b.title.find(title) != string::npos) {
                 cout << b.id << " | " << b.title << " | " << b.author << endl;
                 found = true;
+                }
             }
-             if (!found) {
-        cout << "Nicio carte gasita.\n";
-        }
+
+             if (!found) 
+             {
+             cout << "Nicio carte gasita.\n";
+            }
     }
 
+
     void listBooks() const {
-        cout << "\n--- CARTI ---\n";
+        cout << "\nCARTI\n";
         for (const auto& b : books) {
             cout << "ID: " << b.id
                  << " | " << b.title
@@ -164,10 +168,15 @@ public:
         int id;
         cout << "ID: "; cin >> id;
 
+        auto oldSize = books.size();
+
         books.erase(remove_if(books.begin(), books.end(),
             [id](Book b) { return b.id == id; }), books.end());
 
-        cout << "Carte stearsa!\n";
+         if (books.size() < oldSize)
+             cout << "Carte stearsa!\n";
+         else
+            cout << "(X) Carte inexistenta!\n";
     }
 
     // Members
@@ -186,11 +195,11 @@ public:
         cout << "Nume: "; getline(cin, m.name);
         members.push_back(m);
 
-        cout << " Membru adaugat!\n";
+        cout << "Membru adaugat!\n";
     }
 
     void listMembers() {
-        cout << "\n MEMBRI\n";
+        cout << "\nMEMBRI\n";
         for (auto& m : members) {
             cout << m.id << " | " << m.name << endl;
         }
@@ -232,7 +241,7 @@ public:
                 for (auto& b : books)
                     if (b.id == bid) b.available = true;
 
-                cout << "↩ Returnare realizata!\n";
+                cout << "-> Returnare realizata!\n";
                 return;
             }
         }
@@ -243,7 +252,7 @@ public:
     // Reports
 
     void report() const {
-        cout << "\n RAPORT COMPLET\n";
+        cout << "\nRAPORT COMPLET\n";
 
         listBooks();
 

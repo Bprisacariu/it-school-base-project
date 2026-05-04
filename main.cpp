@@ -133,14 +133,19 @@ public:
 
     void searchBook() {
         string title;
-        cin.ignore();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         cout << "Cauta titlu: ";
         getline(cin, title);
+
+         bool found = false;
 
         for (auto& b : books) {
             if (b.title.find(title) != string::npos) {
                 cout << b.id << " | " << b.title << " | " << b.author << endl;
+                found = true;
             }
+             if (!found) {
+        cout << "Nicio carte gasita.\n";
         }
     }
 
